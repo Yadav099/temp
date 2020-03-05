@@ -1,3 +1,4 @@
 .nvimlog
 venv/
 .vscode/*
+.env

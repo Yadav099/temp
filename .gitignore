@@ -1,2 +1,3 @@
 .nvimlog
 venv/
+.vscode/*

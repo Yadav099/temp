@@ -3,17 +3,21 @@ from app import APP
 from flask import request
 import json
 
+from app.models import Employee
+
 
 def signup_add_user(user_data):
     employee = {
-        "emp_name" : user_data['employeeName'],
-        "emp_email" : user_data['employeeMail'],
-        "emp_password" : user_data['employeeID'],
+        "emp_name": user_data['employeeName'],
+        "emp_email": user_data['employeeMail'],
+        "emp_pass": user_data['employeeID'],
+        "company_name": user_data['companyName'],
+        "isAdmin": True
     }
     company = {
-        "company_name" : user_data["companyName"],
-        "company_email" : user_data["companyMail"],
+        "company_name": user_data["companyName"],
+        "company_email": user_data["companyMail"],
     }
 
-    employees = Employee() 
-    employees.add_employee(employee, company)
+    employees = Employee()
+    return employees.add_employee(employee, company)

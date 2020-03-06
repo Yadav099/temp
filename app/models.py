@@ -8,20 +8,20 @@ class Company(DB.Model):
 
     __tablename__ = 'company'
     id = DB.Column(DB.Integer, primary_key=True, nullable=False)
-    company_name = DB.Column(DB.String(30), nullable=False)
-    company_email = DB.Column(DB.String(120), nullable=False)
+    company_name = DB.Column(DB.String(30), nullable=False, unique=True)
+    company_email = DB.Column(DB.String(120), nullable=False, unique=True)
 
 
     def add_company(self, company):
         self.company_name = company['company_name']
         self.company_email = company['company_email']
         try:
-            DB.add(self)
+            DB.session.add(self)
             DB.session.commit()
             resp = json.dumps({'message': "Company Added"})
             return Response(resp, 200)
         except Exception as e:
-            print(e.msg)
+            print(str(e))
 
 
 class Employee(DB.Model):
@@ -45,9 +45,9 @@ class Employee(DB.Model):
         company = Company()
         company.add_company(company_val)
         try:
-            DB.add(self)
+            DB.session.add(self)
             DB.session.commit()
             resp = json.dumps({'message': "Company Added"})
             return Response(resp, 200)
         except Exception as e:
-            print(e.msg)
+            print(str(e))

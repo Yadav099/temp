@@ -10,7 +10,7 @@ def login_get_user(user_data):
     try:
         login_data = {
             "company_name": user_data['companyName'],
-            "emp_email": user_data['userName'],
+            "emp_email": user_data['employeeEmailId'],
             "emp_pass": user_data['password'],
         }
         employee = Employee.query.filter_by(emp_pass=login_data["emp_pass"], emp_email=login_data["emp_email"]).first()
@@ -18,4 +18,4 @@ def login_get_user(user_data):
         if employee.id and company.id:
             return Response("", 200)
     except Exception as e:
-        return Response("", 400)
+        print(e.msg)

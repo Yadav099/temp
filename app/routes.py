@@ -29,8 +29,7 @@ def signup_create_user():
             arguments: registration data
             return: status code"""
     try:
-        data = request.json
-        print(data)
+
         signup.signup_add_user(request.json)
         return Response("", 200)
     except Exception as err:
@@ -61,3 +60,4 @@ def dynamic_mail_users():
                             return: string saying send """
     data = request.json
     return mail_customer(data)
+

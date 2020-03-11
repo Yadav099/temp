@@ -36,7 +36,7 @@ class Employee(DB.Model):
 
     def add_employee(self, employee, company_val):
         self.emp_name = employee['emp_name']
-        self.emp_email = employee['emp_pass']
+        self.emp_email = employee['emp_email']
         self.emp_pass = bcrypt.generate_password_hash(employee['emp_pass']).decode("utf-8")
         self.isAdmin = employee['isAdmin']
         self.company_name = employee['company_name']

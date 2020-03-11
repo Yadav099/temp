@@ -1,6 +1,5 @@
 from app import DB, bcrypt
 from flask import Response
-import logging
 import json
 
 
@@ -38,9 +37,10 @@ class Employee(DB.Model):
     def add_employee(self, employee, company_val):
         self.emp_name = employee['emp_name']
         self.emp_email = employee['emp_pass']
-        self.emp_pass = bcrypt.generate_password_hash(employee['emp_pass'])
+        self.emp_pass = bcrypt.generate_password_hash(employee['emp_pass']).decode("utf-8")
         self.isAdmin = employee['isAdmin']
         self.company_name = employee['company_name']
+
 
         company = Company()
         company.add_company(company_val)

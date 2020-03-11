@@ -21,14 +21,13 @@ def auth_required(f):
 
 # api to get the data of newly registered users
 @APP.route('/signup', methods=['POST'])
-@auth_required
+# @auth_required
 def signup_create_user():
     """this block is for the post request
             arguments: registration data
             return: status code"""
     try:
-        data = request.json
-        print(data)
+
         signup.signup_add_user(request.json)
         return Response("", 200)
     except Exception as err:
@@ -36,18 +35,33 @@ def signup_create_user():
 
 
 # api to validate the user
-@APP.route('/login', methods=['GET'])
+@APP.route('/login', methods=['POST'])
 def login_check_user():
     """this block is for the post request
              arguments: user name, email and company name
              return: status code"""
+    # if request.authorization:
+    #     data = request.json
+
+
     if request.authorization and request.authorization.username and request.authorization.password:
         data = request.json
-        login_get_user({
+        return (login_get_user({
             "companyName": data["companyName"],
+            # "companyName": "d",
             "userName": request.authorization.username,
-            "pass": request.authorization.password
-        })
+            "password": request.authorization.password
+        }))
+    else:
+
+        return "wrong"
+
+
+# responses
+    # 1-wrong email
+    # 2-wrong company name
+    # 3-wrong password
+    # 4-right password
 
 
 @APP.route("/")

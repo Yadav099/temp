@@ -11,7 +11,7 @@ def login_get_user(user_data):
     try:
         login_data = {
             "company_name": user_data['companyName'],
-            "emp_email": user_data['userName'],
+            "emp_email": user_data['employeeEmailId'],
             "emp_pass": user_data['password'],
         }
 

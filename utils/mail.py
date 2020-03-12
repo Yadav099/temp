@@ -16,18 +16,14 @@ def mail_customer(data):
     customers = filter_customer({'age_lower': data['age_lower'],
                                  'age_upper': data['age_upper'],
                                  'gender': data['gender']})
-
-    print(customers)
     for customer in customers:
         company = Company.query.filter_by(company_name=customer.company_name).first()
-        print(customer)
         message = data['body']
-        subject = "hello, %s" % customer.customer_name
+        subject = data['event']
         msg = Message(sender=company.company_email,
                       recipients=[customer.customer_email],
                       body=message,
                       subject=subject)
-
         mail.send(msg)
     return "Sent"
 

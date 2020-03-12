@@ -1,3 +1,6 @@
+import csv
+import io
+
 import app
 from app import APP
 from flask import request, Response, make_response
@@ -5,6 +8,7 @@ from functools import wraps
 
 from app.models import Employee
 from utils import signup
+from utils.customers import add_customer_list
 from utils.login import login_get_user
 from utils.mail import mail_customer
 
@@ -62,4 +66,18 @@ def dynamic_mail_users():
                             return: string saying send """
     data = request.json
     return mail_customer(data)
+
+
+# api to insert customer to the database
+@APP.route("/customer", methods=['POST'])
+def customer():
+    file = request.files['csv']
+    if not file:
+        return "No file"
+    file_contents = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
+    file_reader = csv.reader(file_contents)
+    return add_customer_list(file_reader)
+
+
+
 

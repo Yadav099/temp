@@ -17,14 +17,15 @@ def mail_customer(data):
                                  'age_upper': data['age_upper'],
                                  'gender': data['gender']})
     company = Company()
-    for customer in customers:
-        message = data['body']
-        subject = "hello, %s" % customer.name
-        msg = Message(sender=company.company_email,
-                      recipients=[customer.email],
-                      body=message,
-                      subject=subject)
-        mail.send(msg)
+    with mail.connect() as conn:
+        for customer in customers:
+            message = data['body']
+            subject = data['event']
+            msg = Message(sender=company.company_email,
+                          recipients=[customer.email],
+                          body=message,
+                          subject=subject)
+            conn.send(msg)
     return "Sent"
 
 

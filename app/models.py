@@ -60,20 +60,3 @@ class Customer(DB.Model):
     customer_like = DB.Column(DB.tring(20), nullable=False)
     company_name = DB.Column(DB.ForeignKey("company.company_name"))
 
-    def add_customer(self, customer, company_val):
-        self.customer_name = customer['customer_name']
-        self.customer_age = customer['customer_age']
-        self.customer_email = customer['customer_email']
-        self.customer_gender = customer['customer_gender']
-        self.customer_like = customer['customer_like']
-        self.customer_pno = customer['customer_pno']
-
-        company = Company()
-        company.add_company(company_val)
-        try:
-            DB.session.add(self)
-            DB.session.commit()
-            resp = json.dumps({'message': "data added to customer"})
-            return Response(resp, 200)
-        except Exception as e:
-            print(str(e))

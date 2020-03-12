@@ -6,6 +6,7 @@ from functools import wraps
 from app.models import Employee
 from utils import signup
 from utils.login import login_get_user
+from utils.mail import mail_customer
 
 
 def auth_required(f):
@@ -15,7 +16,9 @@ def auth_required(f):
                                             emp_email=request.authorization.username)
         if employee.id:
             return f(*args, **kwargs)
-        return make_response('could not verify your login!', 401, {'WWW-Authentication': 'Basic realm="Login Required"'})
+        return make_response('could not verify your login!', 401,
+                             {'WWW-Authentication': 'Basic realm="Login Required"'})
+
     return decorated
 
 
@@ -28,13 +31,13 @@ def signup_create_user():
     try:
 
         signup.signup_add_user(request.json)
-        return Response("", 200)
+        return Response("Succesfull", 200)
     except Exception as err:
-        return Response("", 400)
+        return Response("Failure", 400)
 
 
 # api to validate the user
-@APP.route('/login', methods=['GET'])
+@APP.route('/login', methods=['POST'])
 def login_check_user():
     """this block is for the post request
              arguments: user name, email and company name
@@ -46,7 +49,17 @@ def login_check_user():
             "userName": request.authorization.username,
             "password": request.authorization.password
         }))
+    else:
+        return "wrong"
 
-@APP.route("/")
-def hello():
-    return "Hello World!"
+
+# api to send mails to the targeted users
+@APP.route("/mail", methods=['GET'])
+def dynamic_mail_users():
+    """to send dynamic mail to all the users
+                            arguments: template name
+                            sends mail to all users with there name in it
+                            return: string saying send """
+    data = request.json
+    return mail_customer(data)
+

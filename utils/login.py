@@ -11,7 +11,7 @@ def login_get_user(user_data):
     try:
         login_data = {
             "company_name": user_data['companyName'],
-            "emp_email": user_data['employeeEmailId'],
+            "emp_email": user_data['userName'],
             "emp_pass": user_data['password'],
         }
 
@@ -20,9 +20,10 @@ def login_get_user(user_data):
         company = Company.query.filter_by(company_name=login_data["company_name"]).first()
 
 # condition statement to check the password with stored hashed password
-        if employee and bcrypt.check_password_hash(employee.emp_pass, login_data["emp_pass"]) and company:
+        if employee  and company and bcrypt.check_password_hash(employee.emp_pass, login_data["emp_pass"]):
             return "Success"
-
+        else:
+            return "Unsuccesful"
 
     except Exception as e:
         print(str(e))

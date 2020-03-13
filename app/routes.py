@@ -1,14 +1,12 @@
 import csv
 import io
-
-import app
 from app import APP
 from flask import request, Response, make_response
 from functools import wraps
 
 from app.models import Employee
 from utils import signup
-from utils.customers import add_customer_list
+from utils.customers import add_customer_list, add_customer
 from utils.login import login_get_user
 from utils.mail import mail_customer
 
@@ -58,19 +56,20 @@ def login_check_user():
 
 
 # api to send mails to the targeted users
-@APP.route("/mail", methods=['GET'])
+@APP.route("/mail", methods=['POST'])
 def dynamic_mail_users():
     """to send dynamic mail to all the users
                             arguments: template name
                             sends mail to all users with there name in it
                             return: string saying send """
     data = request.json
+    print(data)
     return mail_customer(data)
 
 
-# api to insert customer to the database
-@APP.route("/customer", methods=['POST'])
-def customer():
+# api to insert customer data from a CSV file to the database
+@APP.route("/customer/add/CSV", methods=['POST'])
+def customerCSV():
     file = request.files['csv']
     if not file:
         return "No file"
@@ -79,5 +78,9 @@ def customer():
     return add_customer_list(file_reader)
 
 
+# api to insert a row of customer data to the database
+@APP.route("/customer/add", methods=['POST'])
+def customer():
+    return add_customer(request.json)
 
 

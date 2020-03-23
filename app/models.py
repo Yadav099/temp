@@ -1,6 +1,25 @@
-from app import DB, bcrypt
+from app import DB, bcrypt, METADATA
 from flask import Response
+import os
+import sys
 import json
+import pprint
+import inspect
+import importlib
+
+
+from sqlalchemy.ext.automap import automap_base
+
+Base = automap_base()
+METADATA.reflect(DB.engine)
+
+Base.prepare(DB.engine, reflect=True)
+
+for tables in Base.classes.keys():
+    if "_employee" in tables:
+        table_args = {'autoload':True, 'autoload_with': DB.engine}
+        args = {'__tablename__': tables, '__module__': 'app.models','__table_args__': table_args}
+        table = type(tables, (DB.Model,), args)
 
 
 class Company(DB.Model):
@@ -57,6 +76,29 @@ class Customer(DB.Model):
     customer_pno = DB.Column(DB.Integer, nullable=False)
     customer_gender = DB.Column(DB.String(8), nullable=False)
     customer_age = DB.Column(DB.Integer, nullable=False)
-    customer_like = DB.Column(DB.tring(20), nullable=False)
+    customer_like = DB.Column(DB.String(20), nullable=False)
     company_name = DB.Column(DB.ForeignKey("company.company_name"))
+
+
+def add_employee(employee, company_val):
+    METADATA.reflect(DB.engine)
+    name = '{}_employee'.format(os.environ['COMPANY'])
+    employee_table = Base.classes.get(name)
+    employees = employee_table()
+
+    employees.emp_name = employee['emp_name']
+    employees.emp_email = employee['emp_email']
+    employees.emp_pass = bcrypt.generate_password_hash(employee['emp_pass']).decode("utf-8")
+    employees.isAdmin = employee['isAdmin']
+    employees.company_name = employee['company_name']
+
+    company = Company()
+    company.add_company(company_val)
+    try:
+        DB.session.add(employees)
+        DB.session.commit()
+        resp = json.dumps({'message': "Company Added"})
+        return Response(resp, 200)
+    except Exception as e:
+        print(str(e))
 

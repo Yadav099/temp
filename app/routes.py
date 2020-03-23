@@ -48,7 +48,7 @@ def login_check_user():
         data = request.json
         return (login_get_user({
             "companyName": data["companyName"],
-            "userName": request.authorization.username,
+            "user_email": request.authorization.username,
             "pass": request.authorization.password
         }))
 
@@ -75,9 +75,9 @@ def customer():
     return add_customer_list(file_reader)
 
 
-# api to insert a row of customer data to the database
-@APP.route("/customer/add/CSV", methods=['POST'])
-def customer():
-    return add_customer(request.json)
-
+#  api to insert a row of customer data to the database
+#  @APP.route("/customer/add/CSV", methods=['POST'])
+#  def customer():
+    #  return customers.add_customer(request.json)
+#
 

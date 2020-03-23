@@ -4,24 +4,24 @@ from app import APP
 from flask import request, Response, make_response
 from functools import wraps
 
-from app.models import Employee
+#  from app.models import Employee
 from utils import signup
 from utils.customers import add_customer_list, add_customer
 from utils.login import login_get_user
 from utils.mail import mail_customer
 
 
-def auth_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        employee = Employee.query.filter_by(emp_pass=request.authorization.password,
-                                            emp_email=request.authorization.username)
-        if employee.id:
-            return f(*args, **kwargs)
-        return make_response('could not verify your login!', 401,
-                             {'WWW-Authentication': 'Basic realm="Login Required"'})
-
-    return decorated
+#  def auth_required(f):
+    #  @wraps(f)
+    #  def decorated(*args, **kwargs):
+        #  employee = Employee.query.filter_by(emp_pass=request.authorization.password,
+                                            #  emp_email=request.authorization.username)
+        #  if employee.id:
+            #  return f(*args, **kwargs)
+        #  return make_response('could not verify your login!', 401,
+                             #  {'WWW-Authentication': 'Basic realm="Login Required"'})
+#
+    #  return decorated
 
 
 # api to get the data of newly registered users

@@ -1,25 +1,14 @@
 from app import DB, bcrypt, METADATA
 from flask import Response
+from sqlalchemy.ext.automap import automap_base
 import os
 import sys
 import json
-import pprint
-import inspect
-import importlib
-
-
-from sqlalchemy.ext.automap import automap_base
 
 Base = automap_base()
 METADATA.reflect(DB.engine)
 
 Base.prepare(DB.engine, reflect=True)
-
-for tables in Base.classes.keys():
-    if "_employee" in tables:
-        table_args = {'autoload':True, 'autoload_with': DB.engine}
-        args = {'__tablename__': tables, '__module__': 'app.models','__table_args__': table_args}
-        table = type(tables, (DB.Model,), args)
 
 
 class Company(DB.Model):
@@ -31,34 +20,6 @@ class Company(DB.Model):
     def add_company(self, company):
         self.company_name = company['company_name']
         self.company_email = company['company_email']
-        try:
-            DB.session.add(self)
-            DB.session.commit()
-            resp = json.dumps({'message': "Company Added"})
-            return Response(resp, 200)
-        except Exception as e:
-            print(str(e))
-
-
-class Employee(DB.Model):
-    __tablename__ = 'employee'
-    id = DB.Column(DB.Integer, primary_key=True, nullable=False)
-    emp_name = DB.Column(DB.String(50), nullable=False)
-    emp_pass = DB.Column(DB.String(150), nullable=False)
-    emp_email = DB.Column(DB.String(120), nullable=False)
-    isAdmin = DB.Column(DB.Boolean, default=False)
-    company_name = DB.Column(DB.ForeignKey("company.company_name"))
-
-    def add_employee(self, employee, company_val):
-        self.emp_name = employee['emp_name']
-        self.emp_email = employee['emp_email']
-        self.emp_pass = bcrypt.generate_password_hash(employee['emp_pass']).decode("utf-8")
-        self.isAdmin = employee['isAdmin']
-        self.company_name = employee['company_name']
-
-
-        company = Company()
-        company.add_company(company_val)
         try:
             DB.session.add(self)
             DB.session.commit()
@@ -80,8 +41,15 @@ class Customer(DB.Model):
     company_name = DB.Column(DB.ForeignKey("company.company_name"))
 
 
+for tables in Base.classes.keys():
+    if "_employee" in tables:
+        table_args = {'autoload':True, 'autoload_with': DB.engine}
+        args = {'__tablename__': tables, '__module__': 'app.models','__table_args__': table_args}
+        table = type(tables, (DB.Model,), args)
+
+
 def add_employee(employee, company_val):
-    METADATA.reflect(DB.engine)
+    Base.prepare(DB.engine, reflect=True)
     name = '{}_employee'.format(os.environ['COMPANY'])
     employee_table = Base.classes.get(name)
     employees = employee_table()

@@ -3,7 +3,7 @@ from flask import request, Response
 import os
 import json
 
-from app.models import Employee, Company, Base
+from app.models import Company, Base
 
 
 def login_get_user(user_data):

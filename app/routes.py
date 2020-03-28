@@ -71,6 +71,7 @@ def dynamic_mail_users():
 @APP.route("/customer/add/CSV", methods=['POST'])
 def customerCSV():
     file = request.files['csv']
+
     if not file:
         return "No file"
     file_contents = io.StringIO(file.stream.read().decode("UTF8"), newline=None)

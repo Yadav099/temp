@@ -4,24 +4,24 @@ from app import APP
 from flask import request, Response, make_response
 from functools import wraps
 
-from app.models import Employee
+#  from app.models import Employee
 from utils import signup
 from utils.customers import add_customer_list, add_customer
 from utils.login import login_get_user
 from utils.mail import mail_customer
 
 
-def auth_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        employee = Employee.query.filter_by(emp_pass=request.authorization.password,
-                                            emp_email=request.authorization.username)
-        if employee.id:
-            return f(*args, **kwargs)
-        return make_response('could not verify your login!', 401,
-                             {'WWW-Authentication': 'Basic realm="Login Required"'})
-
-    return decorated
+#  def auth_required(f):
+    #  @wraps(f)
+    #  def decorated(*args, **kwargs):
+        #  employee = Employee.query.filter_by(emp_pass=request.authorization.password,
+                                            #  emp_email=request.authorization.username)
+        #  if employee.id:
+            #  return f(*args, **kwargs)
+        #  return make_response('could not verify your login!', 401,
+                             #  {'WWW-Authentication': 'Basic realm="Login Required"'})
+#
+    #  return decorated
 
 
 # api to get the data of newly registered users
@@ -48,8 +48,13 @@ def login_check_user():
         data = request.json
         return (login_get_user({
             "companyName": data["companyName"],
+<<<<<<< HEAD
             "userName": request.authorization.username,
             "password": request.authorization.password
+=======
+            "user_email": request.authorization.username,
+            "pass": request.authorization.password
+>>>>>>> 8340faaab433f73d1db6049982ff0c215ced6cc7
         }))
     else:
         return "wrong"
@@ -79,9 +84,17 @@ def customerCSV():
     return add_customer_list(file_reader)
 
 
+<<<<<<< HEAD
 # api to insert a row of customer data to the database
 @APP.route("/customer/add", methods=['POST'])
 def customer():
     return add_customer(request.json)
 
+=======
+#  api to insert a row of customer data to the database
+#  @APP.route("/customer/add/CSV", methods=['POST'])
+#  def customer():
+    #  return customers.add_customer(request.json)
+#
+>>>>>>> 8340faaab433f73d1db6049982ff0c215ced6cc7
 

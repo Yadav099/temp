@@ -1,6 +1,14 @@
-from app import DB, bcrypt
+from app import DB, bcrypt, METADATA
 from flask import Response
+from sqlalchemy.ext.automap import automap_base
+import os
+import sys
 import json
+
+Base = automap_base()
+METADATA.reflect(DB.engine)
+
+Base.prepare(DB.engine, reflect=True)
 
 
 class Company(DB.Model):
@@ -21,6 +29,7 @@ class Company(DB.Model):
             print(str(e))
 
 
+<<<<<<< HEAD
 class Employee(DB.Model):
     __tablename__ = 'employee'
     id = DB.Column(DB.Integer, primary_key=True, nullable=False)
@@ -48,6 +57,8 @@ class Employee(DB.Model):
             print(str(e))
 
 
+=======
+>>>>>>> 8340faaab433f73d1db6049982ff0c215ced6cc7
 class Customer(DB.Model):
     __tablename__ = 'customer'
     id = DB.Column(DB.Integer, primary_key=True, nullable=False)
@@ -58,3 +69,37 @@ class Customer(DB.Model):
     customer_age = DB.Column(DB.Integer, nullable=False)
     customer_like = DB.Column(DB.String(20), nullable=False)
     company_name = DB.Column(DB.ForeignKey("company.company_name"))
+<<<<<<< HEAD
+=======
+
+
+for tables in Base.classes.keys():
+    if "_employee" in tables:
+        table_args = {'autoload':True, 'autoload_with': DB.engine}
+        args = {'__tablename__': tables, '__module__': 'app.models','__table_args__': table_args}
+        table = type(tables, (DB.Model,), args)
+
+
+def add_employee(employee, company_val):
+    Base.prepare(DB.engine, reflect=True)
+    name = '{}_employee'.format(os.environ['COMPANY'])
+    employee_table = Base.classes.get(name)
+    employees = employee_table()
+
+    employees.emp_name = employee['emp_name']
+    employees.emp_email = employee['emp_email']
+    employees.emp_pass = bcrypt.generate_password_hash(employee['emp_pass']).decode("utf-8")
+    employees.isAdmin = employee['isAdmin']
+    employees.company_name = employee['company_name']
+
+    company = Company()
+    company.add_company(company_val)
+    try:
+        DB.session.add(employees)
+        DB.session.commit()
+        resp = json.dumps({'message': "Company Added"})
+        return Response(resp, 200)
+    except Exception as e:
+        print(str(e))
+
+>>>>>>> 8340faaab433f73d1db6049982ff0c215ced6cc7

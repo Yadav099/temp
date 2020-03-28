@@ -4,7 +4,7 @@ from flask import request, Response
 import json
 from flask_mail import Message
 
-from app.models import Employee, Company, Customer
+from app.models import Company, Customer
 
 
 def mail_customer(data):

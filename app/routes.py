@@ -33,9 +33,9 @@ def signup_create_user():
     try:
 
         signup.signup_add_user(request.json)
-        return Response("Succesfull", 200)
+        return Response("", 200)
     except Exception as err:
-        return Response("Failure", 400)
+        return Response("", 400)
 
 
 # api to validate the user
@@ -48,35 +48,26 @@ def login_check_user():
         data = request.json
         return (login_get_user({
             "companyName": data["companyName"],
-<<<<<<< HEAD
-            "userName": request.authorization.username,
-            "password": request.authorization.password
-=======
             "user_email": request.authorization.username,
             "pass": request.authorization.password
->>>>>>> 8340faaab433f73d1db6049982ff0c215ced6cc7
         }))
-    else:
-        return "wrong"
 
 
 # api to send mails to the targeted users
-@APP.route("/mail", methods=['POST'])
+@APP.route("/mail", methods=['GET'])
 def dynamic_mail_users():
     """to send dynamic mail to all the users
                             arguments: template name
                             sends mail to all users with there name in it
                             return: string saying send """
     data = request.json
-    print(data)
     return mail_customer(data)
 
 
 # api to insert customer data from a CSV file to the database
 @APP.route("/customer/add/CSV", methods=['POST'])
-def customerCSV():
+def customer():
     file = request.files['csv']
-
     if not file:
         return "No file"
     file_contents = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
@@ -84,17 +75,9 @@ def customerCSV():
     return add_customer_list(file_reader)
 
 
-<<<<<<< HEAD
-# api to insert a row of customer data to the database
-@APP.route("/customer/add", methods=['POST'])
-def customer():
-    return add_customer(request.json)
-
-=======
 #  api to insert a row of customer data to the database
 #  @APP.route("/customer/add/CSV", methods=['POST'])
 #  def customer():
     #  return customers.add_customer(request.json)
 #
->>>>>>> 8340faaab433f73d1db6049982ff0c215ced6cc7
 

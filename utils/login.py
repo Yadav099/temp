@@ -11,13 +11,9 @@ def login_get_user(user_data):
     try:
         login_data = {
             "company_name": user_data['companyName'],
-<<<<<<< HEAD
-            "emp_email": user_data['userName'],
-            "emp_pass": user_data['password'],
-=======
+
             "emp_email": user_data['user_email'],
             "emp_pass": user_data['pass'],
->>>>>>> 8340faaab433f73d1db6049982ff0c215ced6cc7
         }
 
 # connecting to employee and company database
@@ -29,12 +25,11 @@ def login_get_user(user_data):
 # condition statement to check the password with stored hashed password
         if employee  and company and bcrypt.check_password_hash(employee.emp_pass, login_data["emp_pass"]):
             return "Success"
-<<<<<<< HEAD
         else:
-            return "Unsuccesful"
-=======
->>>>>>> 8340faaab433f73d1db6049982ff0c215ced6cc7
+            return 'failuree'
+
 
     except Exception as e:
         print(str(e))
+        return "failure"
 

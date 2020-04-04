@@ -22,19 +22,19 @@ def create_app(config_name):
 
 
 APP = create_app('config')
-<<<<<<< HEAD
-APP.config['DEBUG'] = True
-APP.config['TESTING'] = False
-APP.config['MAIL_SERVER'] = 'smtp.gmail.com'
-APP.config['MAIL_PORT'] = 587
-APP.config['MAIL_USE_TLS'] = True
-APP.config['MAIL_USE_SSL'] = False
-APP.config['MAIL_USERNAME'] = 'smartcommhu17@gmail.com'
-APP.config['MAIL_PASSWORD'] = 'qwerty@123'
-APP.config['MAIL_DEFAULT_SENDER'] = 'smartcommhu17@gmail.com'
-APP.config['MAIL_ASCII_ATTACHMENTS'] = False
-=======
->>>>>>> 8340faaab433f73d1db6049982ff0c215ced6cc7
+# <<<<<<< HEAD
+# APP.config['DEBUG'] = True
+# APP.config['TESTING'] = False
+# APP.config['MAIL_SERVER'] = 'smtp.gmail.com'
+# APP.config['MAIL_PORT'] = 587
+# APP.config['MAIL_USE_TLS'] = True
+# APP.config['MAIL_USE_SSL'] = False
+# APP.config['MAIL_USERNAME'] = 'smartcommhu17@gmail.com'
+# APP.config['MAIL_PASSWORD'] = 'qwerty@123'
+# APP.config['MAIL_DEFAULT_SENDER'] = 'smartcommhu17@gmail.com'
+# APP.config['MAIL_ASCII_ATTACHMENTS'] = False
+# =======
+# >>>>>>> 8340faaab433f73d1db6049982ff0c215ced6cc7
 
 bcrypt = Bcrypt(APP)
 

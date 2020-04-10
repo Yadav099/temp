@@ -46,8 +46,8 @@ class Customer(DB.Model):
 
 for tables in Base.classes.keys():
     if "_employee" in tables:
-        table_args = {'autoload':True, 'autoload_with': DB.engine}
-        args = {'__tablename__': tables, '__module__': 'app.models','__table_args__': table_args}
+        table_args = {'autoload': True, 'autoload_with': DB.engine}
+        args = {'__tablename__': tables, '__module__': 'app.models', '__table_args__': table_args}
         table = type(tables, (DB.Model,), args)
 
 
@@ -74,3 +74,45 @@ def add_employee(employee, company_val):
         print("Admin data repeated")
         return e
 
+
+def add_new_employee(employee):
+    Base.prepare(DB.engine, reflect=True)
+    name = '{}_employee'.format(os.environ['COMPANY'])
+    employee_table = Base.classes.get(name)
+    employees = employee_table()
+
+    employees.emp_name = employee['emp_name']
+    employees.emp_email = employee['emp_email']
+    employees.emp_pass = bcrypt.generate_password_hash(employee['emp_pass']).decode("utf-8")
+    employees.isAdmin = "f"
+    employees.company_name = employee['company_name']
+    try:
+        DB.session.add(employees)
+        DB.session.commit()
+        resp = json.dumps({'message': "Company Added"})
+        return Response(resp, 200)
+    except SQLAlchemyError as e:
+        print("Data repeated")
+        return e
+
+
+def changePasswordInDb(data):
+    try:
+        if data['emp_pass'] is not None:
+            Base.prepare(DB.engine, reflect=True)
+            name = '{}_employee'.format(os.environ['COMPANY'])
+            employee_table = Base.classes.get(name)
+            userEmail=os.environ['EMAIL']
+            user = DB.session.query(employee_table).filter_by(emp_email=userEmail).first()
+            if user is not None:
+                user.emp_pass =  bcrypt.generate_password_hash(data['emp_pass']).decode("utf-8")
+                DB.session.commit()
+                return 'updated pass'
+            else:
+                return "No Changes"
+        else:
+            return "No Changes"
+
+        return "Done"
+    except Exception as e:
+        return "Failure"

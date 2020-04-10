@@ -7,6 +7,19 @@ from sqlalchemy.sql import text
 import os
 import json
 
+from app.models import add_new_employee
+
+
+def signup_add_new_nonadmin_user(user_data):
+    employee = {
+        "emp_name": user_data['employeeName'],
+        "emp_email": user_data['employeeMail'],
+        "emp_pass": user_data['employeeId'],
+        "company_name": os.environ['COMPANY'],
+    }
+    print(user_data)
+    return add_new_employee(employee)
+
 
 def signup_add_user(user_data):
     employee = {
@@ -30,10 +43,12 @@ def signup_add_user(user_data):
 def create_dynamic_employee_table():
     try:
         table_name = '{}_employee'.format(os.environ['COMPANY'])
-        table_string = "CREATE TABLE {} (id SERIAL PRIMARY KEY, emp_name varchar(50), emp_pass varchar(150), emp_email varchar(120), company_name varchar(50), FOREIGN KEY (company_name) REFERENCES company (company_name));".format(
+        table_string = "CREATE TABLE {} (id SERIAL PRIMARY KEY, emp_name varchar(50) UNIQUE, emp_pass varchar(150) , emp_email varchar(120) UNIQUE, company_name varchar(50), FOREIGN KEY (company_name) REFERENCES company (company_name));".format(
             table_name)
         DB.session.execute(text(table_string))
         DB.session.commit()
+
+
 
     # except IntegrityError as e:
     # Tried this exception but its not working

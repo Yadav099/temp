@@ -1,3 +1,7 @@
+import os
+
+import pyotp
+
 import app
 from app import APP, mail
 from flask import request, Response
@@ -9,7 +13,7 @@ from app.models import Company, Customer
 
 def mail_customer(data):
     """to send dynamic mail to all the users
-                            arguments: template name
+                             arguments: template name
                             sends mail to all users with there name in it
                             return: string saying send """
 
@@ -34,3 +38,25 @@ def filter_customer(customer_data):
         .filter(Customer.customer_age < customer_data['age_upper']) \
         .filter(Customer.customer_age > customer_data['age_lower']) \
         .all()
+
+
+def mailVerifyToken(data):
+    totp = pyotp.TOTP('base32secret3232', interval=120)
+
+    #
+    # # OTP verified for current time
+    # totp.verify('492039')  # => True
+    # time.sleep(30)
+    # totp.verify('492039')  # => False
+    APP.config['otp'] = totp
+    message = "verrification token is {}".format(totp.now())
+    try:
+        msg = Message(sender=APP.config['MAIL_USERNAME'],
+                      recipients=[os.environ['EMAIL']],
+                      body=message,
+                      subject="Reset your password")
+        mail.send(msg)
+        return "Success"
+    except Exception as e:
+        print(str(e))
+        return "Failed"

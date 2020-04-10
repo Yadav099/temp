@@ -1,30 +1,24 @@
 import csv
 import io
-from app import APP
-from flask import request, Response, make_response
+
+from flask_jwt import jwt_required
+
+from app import APP, jwt
+from flask import request, Response, make_response, jsonify
 from functools import wraps
 
 #  from app.models import Employee
-from utils import signup
+from utils import signup, customers
 from utils.customers import add_customer_list, add_customer
-from utils.login import login_get_user
+from utils.employee import employeeList, deleteEmpployeeByname, forgotEmployeePassword, verrifyEmployeeToken, \
+    changeEmployeePassword
+from utils.login import login_get_user, verifyJWTToken
 from utils.mail import mail_customer
 
-
-#  def auth_required(f):
-    #  @wraps(f)
-    #  def decorated(*args, **kwargs):
-        #  employee = Employee.query.filter_by(emp_pass=request.authorization.password,
-                                            #  emp_email=request.authorization.username)
-        #  if employee.id:
-            #  return f(*args, **kwargs)
-        #  return make_response('could not verify your login!', 401,
-                             #  {'WWW-Authentication': 'Basic realm="Login Required"'})
-#
-    #  return decorated
-
-
 # api to get the data of newly registered users
+from utils.signup import signup_add_new_nonadmin_user
+
+
 @APP.route('/signup', methods=['POST'])
 def signup_create_user():
     """this block is for the post request
@@ -44,24 +38,28 @@ def login_check_user():
     """this block is for the post request
              arguments: user name, email and company name
              return: status code"""
+
     if request.authorization and request.authorization.username and request.authorization.password:
         data = request.json
-        return (login_get_user({
+        return ((login_get_user({
             "companyName": data["companyName"],
             "user_email": request.authorization.username,
             "pass": request.authorization.password
-        }))
+        })))
 
 
 # api to send mails to the targeted users
-@APP.route("/mail", methods=['GET'])
+@APP.route("/mail", methods=['POST'])
 def dynamic_mail_users():
-    """to send dynamic mail to all the users
-                            arguments: template name
-                            sends mail to all users with there name in it
-                            return: string saying send """
-    data = request.json
-    return mail_customer(data)
+    try:
+        """to send dynamic mail to all the users
+                                arguments: template name
+                                sends mail to all users with there name in it
+                                return: string saying send """
+        data = request.json
+        return mail_customer(data)
+    except Exception as e:
+        return e
 
 
 # api to insert customer data from a CSV file to the database
@@ -76,8 +74,53 @@ def customer():
 
 
 #  api to insert a row of customer data to the database
-#  @APP.route("/customer/add/CSV", methods=['POST'])
-#  def customer():
-    #  return customers.add_customer(request.json)
+@APP.route("/customer/addemployee", methods=['POST'])
+def employee():
+    # print(request.json['token'])
+    return signup_add_new_nonadmin_user(request.json)
+
+
 #
 
+@APP.route("/customer/viewemployee", methods=['GET'])
+def viewEmpployee():
+    return employeeList();
+
+
+@APP.route("/customer/deleteEmployee", methods=['DELETE'])
+def deleteEmpployee():
+    data = request.json
+
+    return deleteEmpployeeByname(data);
+
+
+@APP.route('/ForgotPassword', methods=['POST'])
+def forgotPassword():
+    data = request.json
+    return forgotEmployeePassword(data)
+
+
+@APP.route('/VerrifyToken', methods=['POST'])
+def verifyToken():
+    data = request.json
+    return verrifyEmployeeToken(data)
+
+
+@APP.route("/ChangePassword", methods=['PUT'])
+def changePassword():
+    data = request.json
+    return changeEmployeePassword(data)
+
+
+@APP.route("/verify", methods=['POST'])
+def verifyUser():
+    data = request.json
+    return verifyJWTToken(data)
+
+
+blacklist = set()
+
+
+@APP.route("/logout", methods=['POST'])
+def logout():
+    data = request.json['token']

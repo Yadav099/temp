@@ -5,7 +5,7 @@ import os
 import sys
 import json
 
-from app.models import changePasswordInDb
+from app.models import changePasswordInDb, changeEmployeeEmailInDb
 from utils.mail import mailVerifyToken
 
 Base = automap_base()
@@ -22,7 +22,7 @@ def employeeList():
     for user in employee:
         response.append({"name": user.emp_name, "mail": user.emp_email})
 
-    result = {"data": response}
+    result = {"data": response, "employeeEmail": os.environ['EMAIL']}
     return result
 
 
@@ -69,7 +69,32 @@ def verrifyEmployeeToken(data):
     except Exception as e:
         return "Failure"
 
+
 def changeEmployeePassword(data):
     return changePasswordInDb(data);
 
 
+def changeEmployeeEmail(data):
+    return changeEmployeeEmailInDb(data);
+
+
+def changeEmployeeProfilePassword(data):
+    try:
+        Base.prepare(DB.engine, reflect=True)
+        name = '{}_employee'.format(os.environ['COMPANY'])
+        employee_table = Base.classes.get(name)
+        userEmail = os.environ['EMAIL']
+
+        user = DB.session.query(employee_table).filter_by(emp_email=userEmail).first()
+        if user and bcrypt.check_password_hash(user.emp_pass, data["emp_password"]):
+            user.emp_pass = bcrypt.generate_password_hash(data['new_password']).decode("utf-8")
+            DB.session.commit()
+
+            return "success"
+        else:
+            return "fail"
+
+
+    except Exception as e:
+        print(str(e))
+        return "Failure"

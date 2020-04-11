@@ -26,7 +26,8 @@ def login_get_user(user_data):
         # condition statement to check the password with stored hashed password
         if employee and company and bcrypt.check_password_hash(employee.emp_pass, login_data["emp_pass"]):
             os.environ['COMPANY'] = user_data['companyName']
-            encoded = jwt.encode({'exp': datetime.utcnow() + timedelta(minutes=1), 'a': 't'}, 'secret',
+            os.environ['EMAIL']=login_data['emp_email']
+            encoded = jwt.encode({'exp': datetime.utcnow() + timedelta(seconds=1800), 'a': 't'}, 'secret',
                                  algorithm='HS256').decode(
                 "utf-8")
 

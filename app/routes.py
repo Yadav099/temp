@@ -11,7 +11,7 @@ from functools import wraps
 from utils import signup, customers
 from utils.customers import add_customer_list, add_customer
 from utils.employee import employeeList, deleteEmpployeeByname, forgotEmployeePassword, verrifyEmployeeToken, \
-    changeEmployeePassword
+    changeEmployeePassword, changeEmployeeEmail, changeEmployeeProfilePassword
 from utils.login import login_get_user, verifyJWTToken
 from utils.mail import mail_customer
 
@@ -118,9 +118,18 @@ def verifyUser():
     return verifyJWTToken(data)
 
 
-blacklist = set()
 
 
 @APP.route("/logout", methods=['POST'])
 def logout():
     data = request.json['token']
+
+@APP.route("/ChangeEmail", methods=['POST'])
+def ChangeEmail():
+    data = request.json
+    return changeEmployeeEmail(data)
+
+@APP.route("/ChangeProfilePassword", methods=['PUT'])
+def changeProfilePassword():
+    data = request.json
+    return changeEmployeeProfilePassword(data)

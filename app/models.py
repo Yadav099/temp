@@ -1,3 +1,6 @@
+import datetime
+
+import jwt
 from sqlalchemy.exc import SQLAlchemyError, DBAPIError, IntegrityError
 from sqlalchemy.orm.exc import FlushError
 from app import DB, bcrypt, METADATA
@@ -102,10 +105,10 @@ def changePasswordInDb(data):
             Base.prepare(DB.engine, reflect=True)
             name = '{}_employee'.format(os.environ['COMPANY'])
             employee_table = Base.classes.get(name)
-            userEmail=os.environ['EMAIL']
+            userEmail = os.environ['EMAIL']
             user = DB.session.query(employee_table).filter_by(emp_email=userEmail).first()
             if user is not None:
-                user.emp_pass =  bcrypt.generate_password_hash(data['emp_pass']).decode("utf-8")
+                user.emp_pass = bcrypt.generate_password_hash(data['emp_pass']).decode("utf-8")
                 DB.session.commit()
                 return 'updated pass'
             else:
@@ -115,4 +118,28 @@ def changePasswordInDb(data):
 
         return "Done"
     except Exception as e:
+        print(str(e))
+        return "Failure"
+
+
+def changeEmployeeEmailInDb(data):
+    try:
+        Base.prepare(DB.engine, reflect=True)
+        name = '{}_employee'.format(os.environ['COMPANY'])
+        employee_table = Base.classes.get(name)
+        userEmail = os.environ['EMAIL']
+        print(data['emp_email'])
+        print(userEmail)
+        user = DB.session.query(employee_table).filter_by(emp_email=userEmail).first()
+        if user and bcrypt.check_password_hash(user.emp_pass, data["emp_password"]):
+            user.emp_email = data['emp_email']
+            DB.session.commit()
+            os.environ['EMAIL']=data['emp_email']
+            return "success"
+        else:
+            return "fail"
+
+
+    except Exception as e:
+        print(str(e))
         return "Failure"

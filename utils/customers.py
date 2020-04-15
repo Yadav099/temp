@@ -1,5 +1,4 @@
 from app import DB
-#  from app.models import Employee, Customer
 from app.models import Customer
 
 

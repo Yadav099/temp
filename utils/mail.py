@@ -1,3 +1,4 @@
+import datetime
 import os
 
 import pyotp
@@ -8,7 +9,7 @@ from flask import request, Response
 import json
 from flask_mail import Message
 
-from app.models import Company, Customer
+from app.models import Company, Customer, mailLogging
 
 
 def mail_customer(data):
@@ -20,7 +21,9 @@ def mail_customer(data):
     customers = filter_customer({'age_lower': data['age_lower'],
                                  'age_upper': data['age_upper'],
                                  'gender': data['gender']})
+    recievers=[]
     for customer in customers:
+        recievers.append(customer.customer_email)
         company = Company.query.filter_by(company_name=customer.company_name).first()
         message = data['body']
         subject = data['event']
@@ -28,7 +31,12 @@ def mail_customer(data):
                       recipients=[customer.customer_email],
                       body=message,
                       subject=subject)
-        mail.send(msg)
+        # mail.send(msg)
+        log={"sender":  os.environ['EMAIL'],
+             "reciever":recievers,
+             "company_name":os.environ['COMPANY']
+             }
+        mailLogging(log)
     return "Sent"
 
 

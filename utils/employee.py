@@ -1,9 +1,10 @@
 from app import DB, bcrypt, METADATA, APP
-from flask import Response
+from flask import Response, jsonify
 from sqlalchemy.ext.automap import automap_base
 import os
 import sys
 import json
+from app.models import Company, Base
 
 from app.models import changePasswordInDb, changeEmployeeEmailInDb
 from utils.mail import mailVerifyToken
@@ -15,15 +16,21 @@ Base.prepare(DB.engine, reflect=True)
 
 
 def employeeList():
-    name = '{}_employee'.format(os.environ['COMPANY'])
-    employee_table = Base.classes.get(name)
-    employee = DB.session.query(employee_table).all()
-    response = []
-    for user in employee:
-        response.append({"name": user.emp_name, "mail": user.emp_email})
+    try:
+        name = '{}_employee'.format(os.environ['COMPANY'].lower())
+        employee_table = Base.classes.get(name)
+        employee = DB.session.query(employee_table).all()
+        response = []
+        for user in employee:
+            response.append({"name": user.emp_name, "mail": user.emp_email, "admin": user.admin})
 
-    result = {"data": response, "employeeEmail": os.environ['EMAIL']}
-    return result
+        result = {"data": response, "employeeEmail": os.environ['EMAIL']}
+        return result
+
+    except Exception as e:
+        print(str(e))
+        result = jsonify({"error": "NO Data"})
+        return result
 
 
 def deleteEmpployeeByname(userdata):
@@ -46,11 +53,12 @@ def deleteEmpployeeByname(userdata):
 def forgotEmployeePassword(data):
     try:
         name = '{}_employee'.format(data['emp_company'])
-        os.environ['COMPANY'] = data['emp_company']
+        os.environ['COMPANY'] = data['emp_company'].lower()
         os.environ['EMAIL'] = data['emp_email']
 
         employee_table = Base.classes.get(name)
         employee = DB.session.query(employee_table).filter_by(emp_email=data['emp_email']).first()
+        company = Company.query.filter_by(company_name=login_data["company_name"]).first()
 
         # condition statement to check the password with stored hashed password
         if employee:
@@ -98,3 +106,27 @@ def changeEmployeeProfilePassword(data):
     except Exception as e:
         print(str(e))
         return "Failure"
+
+
+def userDetails():
+    try:
+        Base.prepare(DB.engine, reflect=True)
+        name = '{}_employee'.format(os.environ['COMPANY'])
+        employee_table = Base.classes.get(name)
+        userEmail = os.environ['EMAIL']
+        company = Company.query.filter_by(company_name=os.environ['COMPANY']).first()
+
+        user = DB.session.query(employee_table).filter_by(emp_email=userEmail).first()
+        if user and company:
+            data = {"name": user.emp_name, "email": user.emp_email, "admin": user.admin,
+                    "companyEmail": company.company_email,
+                    "company": company.company_name}
+            return data
+        else:
+            return {"Error": "Failed"}
+
+
+    except Exception as e:
+        print(str(e))
+        return {"Error": "No connection"}
+    return data

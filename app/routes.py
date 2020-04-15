@@ -11,12 +11,12 @@ from functools import wraps
 from utils import signup, customers
 from utils.customers import add_customer_list, add_customer
 from utils.employee import employeeList, deleteEmpployeeByname, forgotEmployeePassword, verrifyEmployeeToken, \
-    changeEmployeePassword, changeEmployeeEmail, changeEmployeeProfilePassword
+    changeEmployeePassword, changeEmployeeEmail, changeEmployeeProfilePassword, userDetails
 from utils.login import login_get_user, verifyJWTToken
 from utils.mail import mail_customer
 
 # api to get the data of newly registered users
-from utils.signup import signup_add_new_nonadmin_user
+from utils.signup import signup_add_new_user
 
 
 @APP.route('/signup', methods=['POST'])
@@ -26,10 +26,10 @@ def signup_create_user():
             return: status code"""
     try:
 
-        signup.signup_add_user(request.json)
-        return Response("", 200)
+
+        return signup.signup_add_user(request.json)
     except Exception as err:
-        return Response("", 400)
+        return "Data not proper"
 
 
 # api to validate the user
@@ -77,7 +77,7 @@ def customer():
 @APP.route("/customer/addemployee", methods=['POST'])
 def employee():
     # print(request.json['token'])
-    return signup_add_new_nonadmin_user(request.json)
+    return signup_add_new_user(request.json)
 
 
 #
@@ -118,18 +118,23 @@ def verifyUser():
     return verifyJWTToken(data)
 
 
-
-
 @APP.route("/logout", methods=['POST'])
 def logout():
     data = request.json['token']
+
 
 @APP.route("/ChangeEmail", methods=['POST'])
 def ChangeEmail():
     data = request.json
     return changeEmployeeEmail(data)
 
+
 @APP.route("/ChangeProfilePassword", methods=['PUT'])
 def changeProfilePassword():
     data = request.json
     return changeEmployeeProfilePassword(data)
+
+
+@APP.route("/user", methods=['GET'])
+def UserPRofile():
+    return userDetails()

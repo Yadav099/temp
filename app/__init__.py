@@ -1,4 +1,3 @@
-import smtplib
 
 from flask_mail import Mail
 
@@ -11,7 +10,6 @@ from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_ngrok import run_with_ngrok
 from flask_jwt_extended import JWTManager
-import nexmo
 
 
 def create_app(config_name):
@@ -28,7 +26,6 @@ run_with_ngrok(APP)
 
 APP.config['JWT_SECRET_KEY'] = 'super-secret'  # Change this!
 jwt = JWTManager(APP)
-client = nexmo.Client(key='a1900148', secret='Gx22NlyE3kqoeg26')
 
 # <<<<<<< HEAD
 APP.config['DEBUG'] = True
@@ -53,3 +50,6 @@ METADATA = DB.MetaData()
 MIGRATE = Migrate(APP, DB, compare_type=True)
 
 from app import routes, models
+
+
+# sudo -u postgres psql smartcomm

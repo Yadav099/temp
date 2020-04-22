@@ -1,14 +1,10 @@
-import datetime
-
-import jwt
 from sqlalchemy.exc import SQLAlchemyError, DBAPIError, IntegrityError
-from sqlalchemy.orm.exc import FlushError
 from app import DB, bcrypt, METADATA
 from flask import Response
 from sqlalchemy.ext.automap import automap_base
 import os
-import sys
 import json
+
 
 Base = automap_base()
 METADATA.reflect(DB.engine)
@@ -44,6 +40,8 @@ class Customer(DB.Model):
     customer_gender = DB.Column(DB.String(8), nullable=False)
     customer_age = DB.Column(DB.Integer, nullable=False)
     customer_like = DB.Column(DB.String(20), nullable=False)
+    date=DB.Column(DB.TIMESTAMP)
+
     company_name = DB.Column(DB.ForeignKey("company.company_name"))
 
 
@@ -55,48 +53,68 @@ for tables in Base.classes.keys():
 
 
 def add_employee(employee, company_val):
-    Base.prepare(DB.engine, reflect=True)
-    name = '{}_employee'.format(os.environ['COMPANY'])
-    employee_table = Base.classes.get(name)
-    employees = employee_table()
-
-    employees.emp_name = employee['emp_name']
-    employees.emp_email = employee['emp_email']
-    employees.emp_pass = bcrypt.generate_password_hash(employee['emp_pass']).decode("utf-8")
-    employees.isAdmin = employee['isAdmin']
-    employees.company_name = employee['company_name']
-
-    company = Company()
-    company.add_company(company_val)
     try:
+        Base.prepare(DB.engine, reflect=True)
+        name = '{}_employee'.format(os.environ['COMPANY'])
+        employee_table = Base.classes.get(name)
+        employees = employee_table()
+
+        employees.emp_name = employee['emp_name']
+        employees.emp_email = employee['emp_email']
+        employees.admin = employee['isAdmin']
+        employees.company_name = employee['company_name']
+
+        company = Company()
+        company.add_company(company_val)
+
         DB.session.add(employees)
         DB.session.commit()
-        resp = json.dumps({'message': "Company Added"})
-        return Response(resp, 200)
+
+        os.environ['COMPANY']=company_val['company_name']
+        os.environ['EMAIL']=employee['emp_email']
+        return "Successful"
     except SQLAlchemyError as e:
-        print("Admin data repeated")
-        return e
+        print(e)
+        return "Company details already exist"
+
+def add_new_employee_auth(employee):
+      try:
+            Base.prepare(DB.engine, reflect=True)
+            name = '{}_employee'.format(os.environ['COMPANY']).lower()
+            employee_table = Base.classes.get(name)
+            employees = employee_table()
+
+            employees.emp_email = employee['emp_email']
+            employees.admin = employee['isAdmin']
+            employees.company_name = employee['company_name']
+
+            DB.session.add(employees)
+            DB.session.commit()
+
+            return "Successful"
+
+      except SQLAlchemyError as e:
+        print(e)
+        return "Company details already exist"
 
 
 def add_new_employee(employee):
     Base.prepare(DB.engine, reflect=True)
-    name = '{}_employee'.format(os.environ['COMPANY'])
+    name = '{}_employee'.format(employee['company'].lower())
     employee_table = Base.classes.get(name)
-    employees = employee_table()
 
+    employees = DB.session.query(employee_table).filter_by(emp_email=employee['emp_email']).first()
     employees.emp_name = employee['emp_name']
-    employees.emp_email = employee['emp_email']
+    employees.emp_id=employee['emp_id']
     employees.emp_pass = bcrypt.generate_password_hash(employee['emp_pass']).decode("utf-8")
-    employees.isAdmin = "f"
-    employees.company_name = employee['company_name']
+    employees.auth=employee['auth']
     try:
         DB.session.add(employees)
         DB.session.commit()
-        resp = json.dumps({'message': "Company Added"})
-        return Response(resp, 200)
+        return "Successful"
     except SQLAlchemyError as e:
         print("Data repeated")
-        return e
+        return "Data repeated"
 
 
 def changePasswordInDb(data):
@@ -134,7 +152,7 @@ def changeEmployeeEmailInDb(data):
         if user and bcrypt.check_password_hash(user.emp_pass, data["emp_password"]):
             user.emp_email = data['emp_email']
             DB.session.commit()
-            os.environ['EMAIL']=data['emp_email']
+            os.environ['EMAIL'] = data['emp_email']
             return "success"
         else:
             return "fail"
@@ -143,3 +161,21 @@ def changeEmployeeEmailInDb(data):
     except Exception as e:
         print(str(e))
         return "Failure"
+
+
+def mailLogging(log):
+    try:
+        Base.prepare(DB.engine, reflect=True)
+        name = '{}_mail'.format(os.environ['COMPANY'])
+        mail_table = Base.classes.get(name)
+        mail = mail_table()
+        mail.sender=log['sender']
+        mail.reciever=log['reciever']
+        mail.company_name=log['company_name']
+
+        DB.session.add(mail)
+        DB.session.commit()
+        print("done")
+    except Exception as e:
+        print(str(e))
+

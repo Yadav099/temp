@@ -1,9 +1,12 @@
 import csv
 import io
+import json
 
 from flask_jwt import jwt_required
+from itsdangerous import SignatureExpired
+from werkzeug.utils import redirect
 
-from app import APP, jwt
+from app import APP, jwt, confirm_serializer
 from flask import request, Response, make_response, jsonify
 from functools import wraps
 
@@ -11,12 +14,13 @@ from functools import wraps
 from utils import signup, customers
 from utils.customers import add_customer_list, add_customer
 from utils.employee import employeeList, deleteEmpployeeByname, forgotEmployeePassword, verrifyEmployeeToken, \
-    changeEmployeePassword, changeEmployeeEmail, changeEmployeeProfilePassword, userDetails
+    changeEmployeePassword, changeEmployeeEmail, changeEmployeeProfilePassword, userDetails, emailAuthentication
 from utils.login import login_get_user, verifyJWTToken
 from utils.mail import mail_customer
 
 # api to get the data of newly registered users
-from utils.signup import signup_add_new_user
+from utils.selectFilter import selectFilter, getLimit
+from utils.signup import signup_add_new_user, signup_add_new_user_auth
 
 
 @APP.route('/signup', methods=['POST'])
@@ -57,7 +61,7 @@ def dynamic_mail_users():
                                 sends mail to all users with there name in it
                                 return: string saying send """
         data = request.json
-        return mail_customer(data)
+        return mail_customer(data['form'])
     except Exception as e:
         return e
 
@@ -79,8 +83,15 @@ def employee():
     # print(request.json['token'])
     return signup_add_new_user(request.json)
 
-
 #
+
+#  api to insert a row of customer data to the database
+@APP.route("/customer/addnewemployee", methods=['POST'])
+def employeeAuth():
+    # print(request.json['token'])
+    return  signup_add_new_user_auth(request.json)
+
+
 
 @APP.route("/customer/viewemployee", methods=['GET'])
 def viewEmpployee():
@@ -138,3 +149,34 @@ def changeProfilePassword():
 @APP.route("/user", methods=['GET'])
 def UserPRofile():
     return userDetails()
+
+@APP.route("/confirm-email/<token>")
+def confirm_email(token):
+    try:
+        print(token)
+        data=confirm_serializer.loads(token,max_age=10000,salt='email-confirm')
+        print(data)
+        emailAuthentication(data)
+        return redirect(("https://smartcomm-front.yadavpadiyar.now.sh/UserDetails/{}").format(data), code=302)
+    except Exception as e:
+        print(e)
+        return "<h2>error</h2>"
+
+
+
+@APP.route("/SetFilters",methods=['POST'])
+def SelectFilter():
+    try:
+
+        data = json.loads(request.data)
+
+        print(data['arr'])
+        return selectFilter(data['arr'])
+    except Exception as e:
+        print(str(e))
+        return "Error"
+
+
+@APP.route("/getlimit",methods=['POST'])
+def getLimitOfFilter():
+    return  getLimit(request.json['attribute'])

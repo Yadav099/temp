@@ -11,7 +11,7 @@ from app.models import Company, Base
 def login_get_user(user_data):
     try:
         login_data = {
-            "company_name": user_data['companyName'],
+            "company_name": user_data['companyName'].lower(),
 
             "emp_email": user_data['user_email'],
             "emp_pass": user_data['pass'],
@@ -25,7 +25,7 @@ def login_get_user(user_data):
         admin=employee.admin
         # condition statement to check the password with stored hashed password
         if employee and company and bcrypt.check_password_hash(employee.emp_pass, login_data["emp_pass"]):
-            os.environ['COMPANY'] = user_data['companyName']
+            os.environ['COMPANY'] = user_data['companyName'].lower()
             print(
             os.environ['COMPANY']
 
@@ -34,7 +34,7 @@ def login_get_user(user_data):
             encoded = jwt.encode({'exp': datetime.utcnow() + timedelta(seconds=1800), 'a': 't'}, 'secret',
                                  algorithm='HS256').decode(
                 "utf-8")
-
+            print(admin)
             return jsonify({"access_token": {"token": str(encoded), "admin":admin}})
 
 

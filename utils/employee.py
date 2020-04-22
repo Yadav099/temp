@@ -22,7 +22,8 @@ def employeeList():
         employee = DB.session.query(employee_table).all()
         response = []
         for user in employee:
-            response.append({"name": user.emp_name, "mail": user.emp_email, "admin": user.admin})
+            if user.auth:
+                response.append({"name": user.emp_name, "mail": user.emp_email,"id":user.emp_id, "admin": user.admin})
 
         result = {"data": response, "employeeEmail": os.environ['EMAIL']}
         return result
@@ -89,7 +90,7 @@ def changeEmployeeEmail(data):
 def changeEmployeeProfilePassword(data):
     try:
         Base.prepare(DB.engine, reflect=True)
-        name = '{}_employee'.format(os.environ['COMPANY'])
+        name = '{}_employee'.format(os.environ['COMPANY'].lower())
         employee_table = Base.classes.get(name)
         userEmail = os.environ['EMAIL']
 
@@ -111,7 +112,7 @@ def changeEmployeeProfilePassword(data):
 def userDetails():
     try:
         Base.prepare(DB.engine, reflect=True)
-        name = '{}_employee'.format(os.environ['COMPANY'])
+        name = '{}_employee'.format(os.environ['COMPANY'].lower())
         employee_table = Base.classes.get(name)
         userEmail = os.environ['EMAIL']
         company = Company.query.filter_by(company_name=os.environ['COMPANY']).first()
@@ -120,7 +121,7 @@ def userDetails():
         if user and company:
             data = {"name": user.emp_name, "email": user.emp_email, "admin": user.admin,
                     "companyEmail": company.company_email,
-                    "company": company.company_name}
+                    "company": company.company_name,"id":user.emp_id}
             return data
         else:
             return {"Error": "Failed"}
@@ -130,3 +131,21 @@ def userDetails():
         print(str(e))
         return {"Error": "No connection"}
     return data
+
+
+def emailAuthentication(data):
+    try:
+
+        # connecting to employee and company database
+        name = '{}_employee'.format(data['company'])
+        employee_table = Base.classes.get(name)
+        employee = DB.session.query(employee_table).filter_by(emp_email=data['email']).first()
+        # condition statement to check the password with stored hashed password
+        if employee :
+            employee.auth = False
+            DB.session.add(employee)
+            DB.session.commit()
+    except Exception as e:
+        return str(e)
+
+
